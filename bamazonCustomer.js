@@ -38,8 +38,9 @@ renameKeys = (keysMap, obj) => Object.keys(obj).reduce((acc, key) => ({ ...acc,
 // Inquirer validate async function that returns product info for a single item id
 function validateID(id) {
   currentInputProdID = id
-  var sql = `SELECT * FROM products WHERE item_id = ${connection.escape(id)}`
+  var sql = `SELECT item_id FROM products WHERE item_id = ${connection.escape(id)}`
   // Declare function as asynchronous, and save the done callback
+
   var done = this.async();
   // Do async stuff
   connection.query(sql, function(error, results) {
@@ -48,9 +49,10 @@ function validateID(id) {
       done("Sorry! That item is not in stock! Please select a different item: ")
       return
     }
-    done(true);
+    console.log(results)
+    done(true)
   });
-  // console.trace('Show me');
+  connection.end();
 }
 
 // Inquirer validate async function that returns stock quantity for a single item id
@@ -140,10 +142,10 @@ function displayStock() {
 // Run main program
 function start() {
   loadSqlSeeds();
-  console.log("\nWelcome to Bamazon! It's like Amazon, but better!\n")
-  console.log("\nYou can purchase items right from your terminal window.\n")
-  console.log("\nOur inventory is instantly updated for you using a MySQL database.\n")
-  console.log("\n\nHappy shopping!\n")
-  console.log("\n\n************************\n\n")
+  console.log("\nWelcome to Bamazon! It's like Amazon, but better!")
+  console.log("\nYou can purchase items right from your terminal window.")
+  console.log("\nOur inventory is instantly updated for you using a MySQL database.")
+  console.log("\n\nHappy shopping!")
+  console.log("\n\n************************\n")
   displayStock();
 }
