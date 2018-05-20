@@ -13,7 +13,7 @@ The app also tracks product sales across each department and then provides a sum
 4. Run `node bamazonCustomer.js`.
 5. Once the application loads, follow the directions on your console screen!
 
-<img src="ss1.JPG" alt="bamazon" width="800" height="640">
-<img src="ss2.JPG" alt="bamazon" width="800" height="640">
-<img src="ss3.JPG" alt="bamazon" width="800" height="640">
-<img src="ss4.JPG" alt="bamazon" width="800" height="640">
+<img src="ss1.JPG" alt="bamazon" width="640" height="480">
+<img src="ss2.JPG" alt="bamazon" width="640" height="480">
+<img src="ss3.JPG" alt="bamazon" width="640" height="480">
+<img src="ss4.JPG" alt="bamazon" width="640" height="480">
