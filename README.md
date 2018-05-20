@@ -7,4 +7,9 @@ The app also tracks product sales across each department and then provides a sum
 
 ## Get Started
 
-Create a local clone of this github repo. With your console application, navigate to the local repo's root folder and run "npm install" then run "node bamazonCustomer.js". Once the application loads, follow the directions on your console screen.
+1. Create a local clone of this github repo.
+2. With your console application, navigate to the local repo's root folder.
+3. Run `npm install`.
+4. Run `node bamazonCustomer.js`.
+5. Once the application loads, follow the directions on your console screen!
+
