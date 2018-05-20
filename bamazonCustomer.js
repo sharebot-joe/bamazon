@@ -35,44 +35,43 @@ renameKeys = (keysMap, obj) => Object.keys(obj).reduce((acc, key) => ({ ...acc,
   }
 }), {})
 
-// Inquirer validate async function that returns product info for a single item id
-function validateID(id) {
-  currentInputProdID = id
-  var sql = `SELECT item_id FROM products WHERE item_id = ${connection.escape(id)}`
-  // Declare function as asynchronous, and save the done callback
+// // Inquirer validate async function that returns product info for a single item id
+// function validateID(id) {
+//   var sql = `SELECT item_id FROM products WHERE item_id = ${connection.escape(id)}`
+//   // Declare function as asynchronous, and save the done callback
 
-  var done = this.async();
-  // Do async stuff
-  connection.query(sql, function(error, results) {
-    if (error) throw error;
-    if (results.length === 0) {
-      done("Sorry! That item is not in stock! Please select a different item: ")
-      return
-    }
-    console.log(results)
-    done(true)
-  });
-  connection.end();
-}
+//   var done = this.async();
+//   // Do async stuff
+//   connection.query(sql, function(error, results) {
+//     if (error) throw error;
+//     if (results.length === 0) {
+//       done("Sorry! That item is not in stock! Please select a different item: ")
+//       return;
+//     }
+//     console.log(results)
+//     done(true)
+//   })
+//   // connection.end();
+// }
 
 // Inquirer validate async function that returns stock quantity for a single item id
-function validateUnits(units) {
-  console.log('currentInputProdID: ', currentInputProdID)
-  var sql = `SELECT stock_quantity FROM products WHERE item_id = ${currentInputProdID}`
-  connection.query(sql, function(error, results) {
-    if (error) throw error;
-    if (units > results) {
-      console.log("\n-------------\n");
-      console.log("\nNot enough items in stock!")
-      console.log("\n-------------\n");
-      console.log("\nPlease enter a different amount: ")
-    } else {
-      console.log("results:", results)
-      console.log("we have enough stock")
-      return true
-    }
-  });
-}
+// function validateUnits(units) {
+//   console.log('currentInputProdID: ', currentInputProdID)
+//   var sql = `SELECT stock_quantity FROM products WHERE item_id = ${currentInputProdID}`
+//   connection.query(sql, function(error, results) {
+//     if (error) throw error;
+//     if (units > results) {
+//       console.log("\n-------------\n");
+//       console.log("\nNot enough items in stock!")
+//       console.log("\n-------------\n");
+//       console.log("\nPlease enter a different amount: ")
+//     } else {
+//       console.log("results:", results)
+//       console.log("we have enough stock")
+//       return true
+//     }
+//   });
+
 
 function promptUser() {
   inquirer.prompt(
@@ -80,39 +79,84 @@ function promptUser() {
         type: "input",
         name: "productID",
         message: "Please enter a Product ID: ",
-        validate: validateID 
+        // validate: validateID
+        validate: function (input) {
+          return new Promise((resolve, reject) => {
+            var sql = `SELECT item_id FROM products WHERE item_id = ${connection.escape(input)}`
+            // Do async stuff
+            connection.query(sql, function(error, results) {
+              if (error) throw error;
+              if (results.length === 0) {
+                console.log("\nSorry, that\'s not a valid Product ID. Please enter a different ID: ")
+                reject(false)
+              } else {
+                resolve(true)
+              }
+            });   
+          });
+        }
       }, {
         type: "input",
         name: "units",
         message: "Please enter # of units to purchase: ",
-        validate: validateUnits
+        validate: function(input) {
+          return !(input < 1)
+        },
+        validate: function (input, answers) {
+          
+          return new Promise((resolve, reject) => {
+
+            // console.log("answers.productID", answers.productID)
+            var sql = `SELECT * FROM products WHERE item_id = ${connection.escape(answers.productID)}`
+            // Do async stuff
+            connection.query(sql, function(error, results) {
+              if (error) throw error;
+              // Parsing currently available stock
+              let currentStock = results[0].stock_quantity
+              let currentID = results[0].item_id
+
+              // Checking available stock against user input
+              if (input > currentStock) {
+                console.log("\n-------------");
+                console.log("\nNot enough items in stock!")
+                console.log("\n-------------");
+                console.log("\nPlease enter a different amount: ")
+                reject(false)
+              } else {
+                processOrder(currentID, input)
+                resolve(true)
+              }
+            });   
+          })    
+        }
       },
       // After the prompt, store the user's response in a variable called answer.
     ]).then(function(answer) {
-    console.log(answer)
-    var prodID = answer.productID;
-    console.log("prodID: ", prodID)
-    var units = answer.units;
-    console.log("units: ", units)
-    processOrder(prodID, units);
+      return true
   });
 }
 
 function processOrder(product_ID, units) {
-  var newStock = results - units
-  var query = `UPDATE products SET stock_quantity = ${newStock} WHERE item_id = ${connection.escape(id)}`
-  // Making SQL querty to update stock quantity
-  connection.query(query, function(error, results) {
+  let update = `UPDATE products SET stock_quantity = stock_quantity - ${units} WHERE item_id = ${product_ID}`
+  // Making SQL query to update stock quantity
+  connection.query(update, function(error, results) {
     if (error) throw error;
-    console.log("results: ", results)
     // Message user
-    console.log("\n-------------\n");
-    console.log("\nThank you for your purchase! ")
     return true
   });
 
-  // update the SQL database to reflect the remaining quantity. Once the update goes through, show the customer the total cost of their purchase
-      
+  let results = `SELECT * FROM products WHERE item_id = ${product_ID}`
+  // Making SQL query to finish transaction 
+  connection.query(results, function(error, results) {
+    if (error) throw error;
+    // Message user
+    let total = (units * results[0].price).toFixed(2)
+    console.log(`\nYour total is $${total}`)
+    console.log("\nThank you for your purchase! Want to keep shopping?")
+    console.log("\n-------------\n");
+    return true
+  });  
+  displayStock()
 }
 
 function loadSqlSeeds() {
