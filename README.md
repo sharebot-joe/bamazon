@@ -1,5 +1,5 @@
 # bamazon
-**An Amazon-like storefront utilizing a MySQL database**
+**An Amazon-like storefront utilizing the command line console and a MySQL database**
 
 Bamazon is an Amazon-like storefront with a MySQL database that stores product information. The app will take in orders from customers via the command line, and update stock accordingly from the store's inventory. 
 
